@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'room_details.dart'; // ✅ Import the target screen
+import 'room_details.dart';
 
 void main() => runApp(MyApp());
 
@@ -51,13 +51,19 @@ class HotelHomePage extends StatelessWidget {
                         Column(
                           children: [
                             Text("Check In", style: TextStyle(fontSize: 10)),
-                            Text("March 16, 2025", style: TextStyle(fontSize: 10)),
+                            Text(
+                              "March 16, 2025",
+                              style: TextStyle(fontSize: 10),
+                            ),
                           ],
                         ),
                         Column(
                           children: [
                             Text("Check Out", style: TextStyle(fontSize: 10)),
-                            Text("March 18, 2025", style: TextStyle(fontSize: 10)),
+                            Text(
+                              "March 18, 2025",
+                              style: TextStyle(fontSize: 10),
+                            ),
                           ],
                         ),
                         Column(
@@ -97,7 +103,7 @@ class HotelHomePage extends StatelessWidget {
               padding: EdgeInsets.only(top: 20),
               child: sectionTitle("Rooms"),
             ),
-            roomList(context), // 🟢 Pass context to allow navigation
+            roomList(context),
 
             // Events Section
             Padding(
@@ -147,7 +153,9 @@ class HotelHomePage extends StatelessWidget {
             //SearchRoom page when a room is tapped
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const DeluxeSuiteRoomPage()),
+              MaterialPageRoute(
+                builder: (context) => const DeluxeSuiteRoomPage(),
+              ),
             );
           },
           child: Container(
@@ -162,7 +170,9 @@ class HotelHomePage extends StatelessWidget {
               children: [
                 Expanded(
                   child: ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
                     child: Image.asset(
                       'assets/images/room${index + 1}.png',
                       width: double.infinity,
@@ -208,7 +218,7 @@ class HotelHomePage extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Image.asset(
-        imgUrl, // 🟢 Use the passed image path
+        imgUrl,
         width: 200,
         fit: BoxFit.cover,
       ),

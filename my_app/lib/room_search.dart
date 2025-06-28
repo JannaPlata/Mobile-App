@@ -9,10 +9,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Hotel Rooms',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'Arial',
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Arial'),
       home: RoomListPage(),
       debugShowCheckedModeBanner: false,
     );
@@ -20,13 +17,16 @@ class MyApp extends StatelessWidget {
 }
 
 class RoomListPage extends StatelessWidget {
-  final List<Map<String, dynamic>> rooms = List.generate(3, (index) => {
-        'title': 'Deluxe Suite Room',
-        'guests': '3 Guests',
-        'price': '\$450/night',
-        'freeCancel': 'Free cancellation',
-        'imageUrl': 'assets/images/room${index + 1}.png',
-      });
+  final List<Map<String, dynamic>> rooms = List.generate(
+    3,
+    (index) => {
+      'title': 'Deluxe Suite Room',
+      'guests': '3 Guests',
+      'price': '\$450/night',
+      'freeCancel': 'Free cancellation',
+      'imageUrl': 'assets/images/room${index + 1}.png',
+    },
+  );
 
   RoomListPage({super.key});
 
@@ -85,7 +85,7 @@ class RoomCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
             child: Image.asset(
-              room['imageUrl'] ?? '',  
+              room['imageUrl'] ?? '',
               height: 160,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -97,16 +97,31 @@ class RoomCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  children: List.generate(5, (i) => Icon(Icons.star, size: 16, color: Colors.orange)),
+                  children: List.generate(
+                    5,
+                    (i) => Icon(Icons.star, size: 16, color: Colors.orange),
+                  ),
                 ),
                 SizedBox(height: 4),
-                Text(room['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  room['title'] ?? '',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
                 SizedBox(height: 4),
                 Text(room['guests'] ?? ''),
                 SizedBox(height: 4),
-                Text(room['price'] ?? '', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+                Text(
+                  room['price'] ?? '',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 SizedBox(height: 2),
-                Text(room['freeCancel'] ?? '', style: TextStyle(color: Colors.green, fontSize: 12)),
+                Text(
+                  room['freeCancel'] ?? '',
+                  style: TextStyle(color: Colors.green, fontSize: 12),
+                ),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -122,7 +137,7 @@ class RoomCard extends StatelessWidget {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

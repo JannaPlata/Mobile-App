@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 //     return Scaffold();
 //   }
 // }
-
 // Main screen representing the hotel room details
 class DeluxeSuiteRoomPage extends StatelessWidget {
   const DeluxeSuiteRoomPage({super.key});
