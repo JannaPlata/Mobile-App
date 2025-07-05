@@ -13,7 +13,7 @@ class RoomListPage extends StatelessWidget {
       'guests': '3 Guests',
       'price': '₱450/night',
       'freeCancel': 'Free cancellation',
-      'imageUrl': 'assets/room${index + 1}.png',
+      'imageUrl': 'assets/images/room${index + 1}.png',
     },
   );
 

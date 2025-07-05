@@ -16,7 +16,7 @@ class DeluxeSuiteRoomPage extends StatelessWidget {
           SizedBox(
             height: screenHeight * 0.4,
             width: double.infinity,
-            child: Image.asset('assets/RoomD.png', fit: BoxFit.cover),
+            child: Image.asset('assets/images/RoomD.png', fit: BoxFit.cover),
           ),
           Positioned(
             top: 40,

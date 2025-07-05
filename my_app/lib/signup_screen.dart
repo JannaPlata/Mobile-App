@@ -98,7 +98,7 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 50),
-                Center(child: Image.asset('assets/logo.png', height: 100)),
+                Center(child: Image.asset('assets/images/logo.png', height: 100)),
                 const SizedBox(height: 15),
                 ShaderMask(
                   shaderCallback: (bounds) => const LinearGradient(
@@ -371,9 +371,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset('assets/google.png', height: 30),
+                          Image.asset('assets/images/google.png', height: 30),
                           const SizedBox(width: 20),
-                          Image.asset('assets/facebook.png', height: 30),
+                          Image.asset('assets/images/facebook.png', height: 30),
                         ],
                       ),
                       const SizedBox(height: 15),

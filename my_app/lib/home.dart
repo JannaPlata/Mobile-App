@@ -20,7 +20,7 @@ class HotelHomePage extends StatelessWidget {
             Stack(
               children: [
                 Image.asset(
-                  'assets/background.jpg',
+                  'assets/images/background.jpg',
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,

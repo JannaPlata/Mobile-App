@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Column(
                 children: [
                   const SizedBox(height: 30),
-                  Center(child: Image.asset('assets/logo.png', height: 150)),
+                  Center(child: Image.asset('assets/images/logo.png', height: 150)),
                   ShaderMask(
                     shaderCallback: (bounds) => const LinearGradient(
                       begin: Alignment.topCenter,
@@ -266,9 +266,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset('assets/google.png', height: 40),
+                          Image.asset('assets/images/google.png', height: 40),
                           const SizedBox(width: 20),
-                          Image.asset('assets/facebook.png', height: 40),
+                          Image.asset('assets/images/facebook.png', height: 40),
                         ],
                       ),
                       const SizedBox(height: 20),
