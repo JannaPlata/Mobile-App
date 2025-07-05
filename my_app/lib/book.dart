@@ -2,24 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'calendar_page.dart';
 import 'alert_message.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: RoomDesignPage(),
-    );
-  }
-}
-
- 
+import 'room_search.dart'; // ✅ make sure this file contains `RoomListPage`
+import 'room_details.dart'; // Still used for "DETAILS" navigation
 
 class RoomDesignPage extends StatefulWidget {
   const RoomDesignPage({super.key});
@@ -37,12 +21,24 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
   int childCount = 0;
   bool showRoomOptions = false;
 
+  void showBookingAlert() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        Future.delayed(const Duration(seconds: 3), () {
+          Navigator.of(context).pop();
+        });
+        return const AlertMessage();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-
       backgroundColor: Colors.white,
       body: Stack(
         children: [
@@ -51,11 +47,25 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
             width: double.infinity,
             child: Image.asset('assets/RoomD.png', fit: BoxFit.cover),
           ),
-          const Positioned(
+
+          // ✅ Back arrow goes to RoomListPage (room_search.dart)
+          Positioned(
             top: 40,
             left: 20,
-            child: Icon(Icons.arrow_back, color: Colors.white, size: 30),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RoomListPage(),
+                  ),
+                );
+              },
+            ),
           ),
+
+          // ✅ White rounded container
           Container(
             margin: EdgeInsets.only(top: screenHeight * 0.3),
             padding: const EdgeInsets.fromLTRB(30, 30, 30, 50),
@@ -73,7 +83,6 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                 ),
               ],
             ),
-
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,18 +97,16 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                       ),
                     ),
                   ),
-                  const AlertMessage(),
-
                   const SizedBox(height: 10),
-
+                  
+                  // Price and Rate
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Price',
+                          Text('Price',
                             style: GoogleFonts.poppins(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
@@ -109,22 +116,15 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Text(
-                                '₱450',
+                              Text('₱450',
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
-                                  color: const Color.fromARGB(
-                                    255,
-                                    52,
-                                    201,
-                                    228,
-                                  ),
+                                  color: const Color.fromARGB(255, 52, 201, 228),
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              Text(
-                                '/night',
+                              Text('/night',
                                 style: GoogleFonts.poppins(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w500,
@@ -138,17 +138,14 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(
+                          const Text(
                             'Rate',
-                            style: TextStyle(
-                              color: const Color.fromARGB(255, 161, 161, 161),
-                            ),
+                            style: TextStyle(color: Color.fromARGB(255, 161, 161, 161)),
                           ),
                           const SizedBox(height: 4),
                           Row(
                             children: const [
-                              Text(
-                                '8.9 ',
+                              Text('4.5 ',
                                 style: TextStyle(
                                   color: Colors.orange,
                                   fontWeight: FontWeight.bold,
@@ -159,34 +156,43 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                               Icon(Icons.star, color: Colors.orange, size: 16),
                               Icon(Icons.star, color: Colors.orange, size: 16),
                               Icon(Icons.star, color: Colors.orange, size: 16),
-                              Icon(
-                                Icons.star_half,
-                                color: Colors.orange,
-                                size: 16,
-                              ),
+                              Icon(Icons.star_half, color: Colors.orange, size: 16),
                             ],
                           ),
                         ],
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 20),
+
+                  // ✅ DETAILS / BOOK NOW section
                   Center(
                     child: Column(
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Text(
-                              'DETAILS',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.black,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const DeluxeSuiteRoomPage(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'DETAILS',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
                               ),
                             ),
-                            SizedBox(width: 100),
-                            Text(
+                            const SizedBox(width: 100),
+                            const Text(
                               'BOOK NOW',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -199,46 +205,25 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            Expanded(
-                              child: Container(
-                                height: 2,
-                                color: Colors.black26,
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                height: 2,
-                                color: Colors.lightBlueAccent,
-                              ),
-                            ),
+                            Expanded(child: Container(height: 2, color: Colors.black26)),
+                            Expanded(child: Container(height: 2, color: Colors.lightBlueAccent)),
                           ],
                         ),
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 40),
+
+                  // ✅ Calendar Selector
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Check In',
-                            style: GoogleFonts.outfit(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Color.fromARGB(113, 0, 0, 0),
-                            ),
-                          ),
-                          Text(
-                            'Check Out',
-                            style: GoogleFonts.outfit(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Color.fromARGB(113, 0, 0, 0),
-                            ),
-                          ),
+                          Text('Check In', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black54)),
+                          Text('Check Out', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black54)),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -246,9 +231,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                         onTap: () async {
                           final result = await Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => CalendarPage(),
-                            ),
+                            MaterialPageRoute(builder: (context) => CalendarPage()),
                           );
                           if (result != null &&
                               result['checkIn'] != null &&
@@ -260,11 +243,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                           }
                         },
                         child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey.shade300),
                             borderRadius: BorderRadius.circular(8),
@@ -276,26 +255,14 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                                 _checkInDate != null
                                     ? '${_checkInDate!.month}/${_checkInDate!.day}/${_checkInDate!.year}'
                                     : 'Select',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color.fromARGB(113, 0, 0, 0),
-                                ),
+                                style: GoogleFonts.outfit(fontSize: 12),
                               ),
-                              const Icon(
-                                Icons.arrow_forward,
-                                size: 18,
-                                color: Colors.grey,
-                              ),
+                              const Icon(Icons.arrow_forward, size: 18, color: Colors.grey),
                               Text(
                                 _checkOutDate != null
                                     ? '${_checkOutDate!.month}/${_checkOutDate!.day}/${_checkOutDate!.year}'
                                     : 'Select',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color.fromARGB(113, 0, 0, 0),
-                                ),
+                                style: GoogleFonts.outfit(fontSize: 12),
                               ),
                             ],
                           ),
@@ -303,176 +270,82 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 30),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Room'),
-                      const SizedBox(height: 6),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            showRoomOptions = !showRoomOptions;
-                          });
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '$roomCount Room, $adultCount Adult, $childCount Child',
-                              ),
-                              const Icon(Icons.add, size: 18),
-                            ],
-                          ),
+
+                  // ✅ Room + Guest Selection
+                  const Text("Room"),
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() => showRoomOptions = !showRoomOptions);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('$roomCount Room, $adultCount Adult, $childCount Child'),
+                          const Icon(Icons.add, size: 18),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (showRoomOptions)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          children: [
+                            buildCounterRow("Rooms", roomCount, (val) {
+                              setState(() {
+                                roomCount = val;
+                                adultCount = 0;
+                                childCount = 0;
+                              });
+                            }),
+                            buildCounterRow("Adults", adultCount, (val) {
+                              if (val <= roomCount * 4) {
+                                setState(() => adultCount = val);
+                              }
+                            }),
+                            buildCounterRow("Children", childCount, (val) {
+                              if (val <= roomCount * 2) {
+                                setState(() => childCount = val);
+                              }
+                            }),
+                          ],
                         ),
                       ),
-                      if (showRoomOptions)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 12),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text('Rooms'),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.remove),
-                                          onPressed: roomCount > 0
-                                              ? () {
-                                                  setState(() {
-                                                    roomCount--;
-                                                    adultCount = roomCount * 2;
-                                                    childCount = 0;
-                                                  });
-                                                }
-                                              : null,
-                                        ),
-                                        Text('$roomCount'),
-                                        IconButton(
-                                          icon: const Icon(Icons.add),
-                                          onPressed: () {
-                                            setState(() {
-                                              roomCount++;
-                                              adultCount = roomCount * 0;
-                                              childCount = 0;
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text('Adults'),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.remove),
-                                          onPressed: adultCount > 0
-                                              ? () {
-                                                  setState(() {
-                                                    adultCount--;
-                                                  });
-                                                }
-                                              : null,
-                                        ),
-                                        Text('$adultCount'),
-                                        IconButton(
-                                          icon: const Icon(Icons.add),
-                                          onPressed: adultCount < roomCount * 4
-                                              ? () {
-                                                  setState(() {
-                                                    adultCount++;
-                                                  });
-                                                }
-                                              : null,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text('Children'),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.remove),
-                                          onPressed: childCount > 0
-                                              ? () {
-                                                  setState(() {
-                                                    childCount--;
-                                                  });
-                                                }
-                                              : null,
-                                        ),
-                                        Text('$childCount'),
-                                        IconButton(
-                                          icon: const Icon(Icons.add),
-                                          onPressed: childCount < roomCount * 2
-                                              ? () {
-                                                  setState(() {
-                                                    childCount++;
-                                                  });
-                                                }
-                                              : null,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                    ),
+
                   const SizedBox(height: 40),
+
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: showBookingAlert,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.lightBlueAccent,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     ),
                     child: const Center(
                       child: Text(
                         'Complete Booking',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 80),
                 ],
               ),
@@ -480,6 +353,29 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
           ),
         ],
       ),
+    );
+  }
+
+  // Helper
+  Widget buildCounterRow(String label, int value, Function(int) onChanged) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label),
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.remove),
+              onPressed: value > 0 ? () => onChanged(value - 1) : null,
+            ),
+            Text('$value'),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => onChanged(value + 1),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

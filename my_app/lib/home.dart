@@ -1,27 +1,17 @@
 import 'package:flutter/material.dart';
 import 'room_details.dart';
-
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: HotelHomePage(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
+import 'room_search.dart';
+import 'profile_screen.dart'; // ✅ Added this import
 
 class HotelHomePage extends StatelessWidget {
-  final TextEditingController _searchController = TextEditingController();
+  final String username;
 
-  HotelHomePage({super.key});
+  const HotelHomePage({super.key, required this.username});
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController searchController = TextEditingController();
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -30,7 +20,7 @@ class HotelHomePage extends StatelessWidget {
             Stack(
               children: [
                 Image.asset(
-                  'assets/images/background.jpg',
+                  'assets/background.jpg',
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -40,7 +30,7 @@ class HotelHomePage extends StatelessWidget {
                   left: 16,
                   right: 16,
                   child: Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
@@ -49,7 +39,7 @@ class HotelHomePage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Column(
-                          children: [
+                          children: const [
                             Text("Check In", style: TextStyle(fontSize: 10)),
                             Text(
                               "March 16, 2025",
@@ -58,7 +48,7 @@ class HotelHomePage extends StatelessWidget {
                           ],
                         ),
                         Column(
-                          children: [
+                          children: const [
                             Text("Check Out", style: TextStyle(fontSize: 10)),
                             Text(
                               "March 18, 2025",
@@ -67,14 +57,21 @@ class HotelHomePage extends StatelessWidget {
                           ],
                         ),
                         Column(
-                          children: [
+                          children: const [
                             Text("Guest", style: TextStyle(fontSize: 10)),
                             Text("2", style: TextStyle(fontSize: 10)),
                           ],
                         ),
                         ElevatedButton(
-                          onPressed: () {},
-                          child: Text("Book Now"),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RoomListPage(),
+                              ),
+                            );
+                          },
+                          child: const Text("Book Now"),
                         ),
                       ],
                     ),
@@ -87,10 +84,10 @@ class HotelHomePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: TextField(
-                controller: _searchController,
+                controller: searchController,
                 decoration: InputDecoration(
                   hintText: "Search Here...",
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -100,31 +97,50 @@ class HotelHomePage extends StatelessWidget {
 
             // Rooms Section
             Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: sectionTitle("Rooms"),
+              padding: const EdgeInsets.only(top: 20),
+              child: sectionTitle(context, "Rooms"),
             ),
             roomList(context),
 
             // Events Section
             Padding(
-              padding: EdgeInsets.only(top: 40),
-              child: sectionTitle("Events"),
+              padding: const EdgeInsets.only(top: 40),
+              child: sectionTitle(context, "Events"),
             ),
             eventList(),
           ],
         ),
       ),
+
       bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.lock), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+        currentIndex: 0, // Home selected
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => RoomListPage()),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfileScreen(username: "Guest"),
+              ),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: ''),
         ],
       ),
     );
   }
 
-  Widget sectionTitle(String title) {
+  Widget sectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
@@ -132,25 +148,32 @@ class HotelHomePage extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          Icon(Icons.arrow_forward),
+          if (title == "Rooms") // ✅ Only show arrow for Rooms
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RoomListPage()),
+                );
+              },
+              child: const Icon(Icons.arrow_forward),
+            ),
         ],
       ),
     );
   }
 
-  //support navigation on tap
   Widget roomList(BuildContext context) {
     return SizedBox(
       height: 130,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: 3,
-        padding: EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemBuilder: (context, index) => GestureDetector(
           onTap: () {
-            //SearchRoom page when a room is tapped
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -160,7 +183,7 @@ class HotelHomePage extends StatelessWidget {
           },
           child: Container(
             width: 160,
-            margin: EdgeInsets.only(right: 12),
+            margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: Colors.grey.shade200,
@@ -170,18 +193,18 @@ class HotelHomePage extends StatelessWidget {
               children: [
                 Expanded(
                   child: ClipRRect(
-                    borderRadius: BorderRadius.vertical(
+                    borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
                     child: Image.asset(
-                      'assets/images/room${index + 1}.png',
+                      'assets/room${index + 1}.png',
                       width: double.infinity,
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
                   child: Text(
                     "Luxxe Lounge\n₱4,550",
                     style: TextStyle(fontSize: 14),
@@ -200,15 +223,15 @@ class HotelHomePage extends StatelessWidget {
       height: 100,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          eventCard('assets/images/offer1.png'),
-          SizedBox(width: 10),
-          eventCard('assets/images/offer2.png'),
-          SizedBox(width: 10),
-          eventCard('assets/images/offer3.png'),
-          SizedBox(width: 10),
-          eventCard('assets/images/offer1.png'),
+          eventCard('assets/offer1.png'),
+          const SizedBox(width: 10),
+          eventCard('assets/offer2.png'),
+          const SizedBox(width: 10),
+          eventCard('assets/offer3.png'),
+          const SizedBox(width: 10),
+          eventCard('assets/offer1.png'),
         ],
       ),
     );
@@ -217,11 +240,7 @@ class HotelHomePage extends StatelessWidget {
   Widget eventCard(String imgUrl) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: Image.asset(
-        imgUrl,
-        width: 200,
-        fit: BoxFit.cover,
-      ),
+      child: Image.asset(imgUrl, width: 200, fit: BoxFit.cover),
     );
   }
 }

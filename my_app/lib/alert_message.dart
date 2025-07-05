@@ -1,54 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AlertMessage extends StatelessWidget {
   const AlertMessage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.lightBlue, // sky blue background
-        borderRadius: BorderRadius.circular(20), // rounded corners
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // White circle with check
-          Container(
-            width: 30,
-            height: 30,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.check,
-              color: Colors.lightBlue,
-              size: 20,
-            ),
+    return Material(
+      color: Colors.transparent,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF58CAFF), // Light blue background
+            borderRadius: BorderRadius.circular(20),
           ),
-          const SizedBox(height: 10),
-          const Text(
-            'Booking Confirmed!',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ✅ Larger, rounded check icon
+              Container(
+                width: 50,
+                height: 50,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_rounded, // Rounded, bolder check icon
+                  color: Color(0xFF58CAFF),
+                  size: 40, // Larger size for better visibility
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Booking Confirmed!',
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Thank you for booking with\nRosario Resorts and Hotel!',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          const Text(
-            'Thank you for booking with\nRosario Hotel & Resort!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.black87,
-              fontSize: 15,
-              fontWeight: FontWeight.normal,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
