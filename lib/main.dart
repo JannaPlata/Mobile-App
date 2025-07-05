@@ -3,6 +3,7 @@ import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/google_signin_screen.dart';
 
 void main() {
   runApp(const RosarioApp());
@@ -23,6 +24,7 @@ class RosarioApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/profile': (context) => const ProfileScreen(),
+        '/google-signin': (context) => const GoogleSignInScreen(),
       },
     );
   }
