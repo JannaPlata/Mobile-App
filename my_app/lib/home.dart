@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'room_details.dart';
 import 'room_search.dart';
-import 'profile_screen.dart'; // ✅ Added this import
+import 'profile_screen.dart'; 
 
 class HotelHomePage extends StatelessWidget {
   final String username;
@@ -150,7 +150,7 @@ class HotelHomePage extends StatelessWidget {
             title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          if (title == "Rooms") // ✅ Only show arrow for Rooms
+          if (title == "Rooms") 
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -197,7 +197,7 @@ class HotelHomePage extends StatelessWidget {
                       top: Radius.circular(12),
                     ),
                     child: Image.asset(
-                      'assets/room${index + 1}.png',
+                      'assets/images/room${index + 1}.png',
                       width: double.infinity,
                       fit: BoxFit.cover,
                     ),
@@ -225,13 +225,13 @@ class HotelHomePage extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          eventCard('assets/offer1.png'),
+          eventCard('assets/images/offer1.png'),
           const SizedBox(width: 10),
-          eventCard('assets/offer2.png'),
+          eventCard('assets/images/offer2.png'),
           const SizedBox(width: 10),
-          eventCard('assets/offer3.png'),
+          eventCard('assets/images/offer3.png'),
           const SizedBox(width: 10),
-          eventCard('assets/offer1.png'),
+          eventCard('assets/images/offer1.png'),
         ],
       ),
     );
