@@ -6,7 +6,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   
-  GoogleSignIn _googleSignIn = GoogleSignIn(
+  GoogleSignIn googleSignIn = GoogleSignIn(
     clientId: '901867556693-i3ijjus5t2f5kj916l4n7ioe5njseg6g.apps.googleusercontent.com',
   );
 

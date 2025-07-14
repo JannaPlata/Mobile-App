@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
-import 'home.dart'; // ✅ Make sure this file exists
+import 'home.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,9 +45,9 @@ class _LoginScreenState extends State<LoginScreen> {
       final data = jsonDecode(response.body);
 
       if (data["success"]) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"])),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(data["message"])));
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -60,9 +60,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      final String? email = account.email;
+      final String email = account.email;
       final String? name = account.displayName;
       final String? photoUrl = account.photoUrl;
 
@@ -91,11 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final response = await http.post(
         Uri.parse(url),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "email": email,
-          "name": name,
-          "photo": photoUrl,
-        }),
+        body: jsonEncode({"email": email, "name": name, "photo": photoUrl}),
       );
 
       final data = jsonDecode(response.body);
@@ -117,9 +113,9 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       print("Google Sign-In Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -260,7 +256,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const Spacer(),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ForgotPasswordScreen(),
+                                ),
+                              );
+                            },
                             child: Text(
                               "Forgot Password?",
                               style: GoogleFonts.poppins(

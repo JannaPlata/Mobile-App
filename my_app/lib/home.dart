@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'room_details.dart';
 import 'room_search.dart';
-import 'profile_screen.dart'; 
+import 'profile_screen.dart'; // ✅ Added this import
 
 class HotelHomePage extends StatelessWidget {
   final String username;
@@ -150,7 +150,7 @@ class HotelHomePage extends StatelessWidget {
             title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          if (title == "Rooms") 
+          if (title == "Rooms") // ✅ Only show arrow for Rooms
             GestureDetector(
               onTap: () {
                 Navigator.push(
