@@ -47,12 +47,12 @@ class ProfileScreen extends StatelessWidget {
           Positioned(
             top: 10,
             right: 10,
-            child: Image.asset("assets/shape_bg1.png", width: 360),
+            child: Image.asset("assets/images/shape_bg1.png", width: 360),
           ),
           Positioned(
             bottom: 10,
             left: 10,
-            child: Image.asset("assets/shape_bg.png", width: 400),
+            child: Image.asset("assets/images/shape_bg.png", width: 400),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 60),

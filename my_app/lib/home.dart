@@ -20,7 +20,7 @@ class HotelHomePage extends StatelessWidget {
             Stack(
               children: [
                 Image.asset(
-                  'assets/background.jpg',
+                  'assets/images/background.jpg',
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -197,7 +197,7 @@ class HotelHomePage extends StatelessWidget {
                       top: Radius.circular(12),
                     ),
                     child: Image.asset(
-                      'assets/room${index + 1}.png',
+                      'assets/images/room${index + 1}.png',
                       width: double.infinity,
                       fit: BoxFit.cover,
                     ),
@@ -225,13 +225,13 @@ class HotelHomePage extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          eventCard('assets/offer1.png'),
+          eventCard('assets/images/offer1.png'),
           const SizedBox(width: 10),
-          eventCard('assets/offer2.png'),
+          eventCard('assets/images/offer2.png'),
           const SizedBox(width: 10),
-          eventCard('assets/offer3.png'),
+          eventCard('assets/images/offer3.png'),
           const SizedBox(width: 10),
-          eventCard('assets/offer1.png'),
+          eventCard('assets/images/offer1.png'),
         ],
       ),
     );

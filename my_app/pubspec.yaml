@@ -13,12 +13,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-
   cupertino_icons: ^1.0.8
   google_fonts: ^4.0.4
   table_calendar: ^3.0.9 
-  http: ^0.13.6
+  google_sign_in: ^6.2.1
+  shared_preferences: ^2.2.0
+  http: ^1.2.1
+
 
 dev_dependencies:
   flutter_test:
@@ -36,20 +37,20 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/RoomD.png
-    - assets/background.jpg
-    - assets/offer1.png
-    - assets/offer2.png
-    - assets/offer3.png
-    - assets/room1.png
-    - assets/room2.png
-    - assets/room3.png
-    - assets/room4.png
-    - assets/logo.png
-    - assets/google.png
-    - assets/facebook.png
-    - assets/shape_bg1.png
-    - assets/shape_bg.png
+    - assets/images/RoomD.png
+    - assets/images/background.jpg
+    - assets/images/offer1.png
+    - assets/images/offer2.png
+    - assets/images/offer3.png
+    - assets/images/room1.png
+    - assets/images/room2.png
+    - assets/images/room3.png
+    - assets/images/room4.png
+    - assets/images/logo.png
+    - assets/images/google.png
+    - assets/images/facebook.png
+    - assets/images/shape_bg1.png
+    - assets/images/shape_bg.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

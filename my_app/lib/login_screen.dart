@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:convert';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
-import 'home.dart'; // ✅ Make sure this file exists
+import 'home.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  // ✅ Manual login (your original PHP + MySQL login)
   Future<void> loginUser() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -36,18 +39,15 @@ class _LoginScreenState extends State<LoginScreen> {
       final response = await http.post(
         Uri.parse(url),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "email": email,
-          "password": password,
-        }),
+        body: jsonEncode({"email": email, "password": password}),
       );
 
       final data = jsonDecode(response.body);
 
       if (data["success"]) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"])),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(data["message"])));
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -60,9 +60,62 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+
+  // ✅ Google Sign-In with forced account picker
+  Future<void> signUpWithGoogle() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+
+    try {
+      // Force sign out to clear cached account
+      await googleSignIn.signOut();
+
+      // Prompt account picker
+      final GoogleSignInAccount? account = await googleSignIn.signIn();
+
+      if (account == null) {
+        print("Google Sign-In cancelled");
+        return;
+      }
+
+      final String email = account.email;
+      final String? name = account.displayName;
+      final String? photoUrl = account.photoUrl;
+
+      const String url = "http://10.0.2.2/db_rosario/google_login.php";
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "name": name, "photo": photoUrl}),
       );
+
+      final data = jsonDecode(response.body);
+
+      if (data["success"]) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Signed in as ${data['username']}")),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HotelHomePage(username: data["username"]),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["message"] ?? "Signup failed")),
+        );
+      }
+    } catch (e) {
+      print("Google Sign-In Error: $e");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -83,7 +136,9 @@ class _LoginScreenState extends State<LoginScreen> {
               Column(
                 children: [
                   const SizedBox(height: 30),
-                  Center(child: Image.asset('assets/logo.png', height: 150)),
+                  Center(
+                    child: Image.asset('assets/images/logo.png', height: 150),
+                  ),
                   ShaderMask(
                     shaderCallback: (bounds) => const LinearGradient(
                       begin: Alignment.topCenter,
@@ -201,7 +256,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const Spacer(),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ForgotPasswordScreen(),
+                                ),
+                              );
+                            },
                             child: Text(
                               "Forgot Password?",
                               style: GoogleFonts.poppins(
@@ -266,9 +329,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset('assets/google.png', height: 40),
+                          GestureDetector(
+                            onTap: signUpWithGoogle,
+                            child: Image.asset(
+                              'assets/images/google.png',
+                              height: 40,
+                            ),
+                          ),
                           const SizedBox(width: 20),
-                          Image.asset('assets/facebook.png', height: 40),
+                          Image.asset('assets/images/facebook.png', height: 40),
                         ],
                       ),
                       const SizedBox(height: 20),
