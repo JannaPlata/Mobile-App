@@ -67,57 +67,60 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ✅ Google Sign-In with forced account picker
-  Future<void> signUpWithGoogle() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+  Future<void> signInWithGoogle() async {
+  final GoogleSignIn googleSignIn = GoogleSignIn();
 
-    try {
-      // Force sign out to clear cached account
-      await googleSignIn.signOut();
+  try {
+    await googleSignIn.signOut(); // Force account picker
 
-      // Prompt account picker
-      final GoogleSignInAccount? account = await googleSignIn.signIn();
+    final GoogleSignInAccount? account = await googleSignIn.signIn();
 
-      if (account == null) {
-        print("Google Sign-In cancelled");
-        return;
-      }
-
-      final String email = account.email;
-      final String? name = account.displayName;
-      final String? photoUrl = account.photoUrl;
-
-      const String url = "http://10.0.2.2/db_rosario/google_login.php";
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email, "name": name, "photo": photoUrl}),
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (data["success"]) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Signed in as ${data['username']}")),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HotelHomePage(username: data["username"]),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"] ?? "Signup failed")),
-        );
-      }
-    } catch (e) {
-      print("Google Sign-In Error: $e");
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    if (account == null) {
+      print("Google Sign-In cancelled");
+      return;
     }
+
+    final String email = account.email;
+    final String? name = account.displayName;
+    final String? photoUrl = account.photoUrl;
+
+    const String url = "http://10.0.2.2/db_rosario/google_login.php";
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": email,
+        "name": name,
+        "photo": photoUrl,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["success"]) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Welcome, ${data['username']}")),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HotelHomePage(username: data["username"]),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data["message"] ?? "Google login failed")),
+      );
+    }
+  } catch (e) {
+    print("Google Sign-In Error: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: $e")),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           GestureDetector(
-                            onTap: signUpWithGoogle,
+                            onTap: signInWithGoogle,
                             child: Image.asset(
                               'assets/images/google.png',
                               height: 40,
