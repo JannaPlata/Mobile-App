@@ -39,7 +39,7 @@ $user = $result->fetch_assoc();
 
 // Generate token and expiration
 $token = bin2hex(random_bytes(16));
-$expires = date("Y-m-d H:i:s", time() + 3600); // valid for 1 hour
+$expires = date("Y-m-d H:i:s", time() + 300); 
 
 // Update user record with token
 $update = $conn->prepare("UPDATE users SET reset_token = ?, reset_expires = ? WHERE email = ?");
@@ -68,7 +68,7 @@ try {
         <h3>Reset Password Request</h3>
         <p>Click the link below to reset your password:</p>
         <a href='$resetLink'>$resetLink</a>
-        <p>This link will expire in 1 hour.</p>
+        <p>This link will expire in  5 minutes.</p>
     ";
 
     $mail->send();
