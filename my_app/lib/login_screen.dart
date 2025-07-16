@@ -5,7 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
-import 'home.dart'; 
+import 'home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,6 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
       final data = jsonDecode(response.body);
 
       if (data["success"]) {
+        // Save user_id to SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('user_id', data["user_id"]);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(data["message"])));
@@ -99,6 +103,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final data = jsonDecode(response.body);
 
     if (data["success"]) {
+      // Save user_id to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('user_id', data["user_id"]);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Welcome, ${data['username']}")),
       );
@@ -121,6 +128,21 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
+  // Add logout function
+  Future<void> logoutUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_id');
+    // Optionally sign out from Google as well
+    try {
+      await GoogleSignIn().signOut();
+    } catch (_) {}
+    // Navigate to login screen
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

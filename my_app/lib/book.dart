@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'calendar_page.dart';
 import 'alert_message.dart';
-import 'room_search.dart'; // ✅ make sure this file contains `RoomListPage`
-import 'room_details.dart'; // Still used for "DETAILS" navigation
+import 'room_search.dart';
+import 'room_details.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RoomDesignPage extends StatefulWidget {
   const RoomDesignPage({super.key});
@@ -20,6 +23,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
   int adultCount = 0;
   int childCount = 0;
   bool showRoomOptions = false;
+  bool _isLoading = false;
 
   void showBookingAlert() {
     showDialog(
@@ -32,6 +36,62 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
         return const AlertMessage();
       },
     );
+  }
+
+  Future<void> submitBooking() async {
+    setState(() => _isLoading = true);
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("You must log in before booking.")),
+      );
+      setState(() => _isLoading = false);
+      return;
+    }
+    print('Booking as user_id: $userId');
+
+    if (_checkInDate == null || _checkOutDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please select check-in and check-out dates.")),
+      );
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    final bookingData = {
+      "booking_type": "online",
+      "room_id": 1, // Update if you have dynamic rooms
+      "room_count": roomCount,
+      "user_id": userId,
+      "checkin_date": "${_checkInDate!.year}-${_checkInDate!.month.toString().padLeft(2, '0')}-${_checkInDate!.day.toString().padLeft(2, '0')}",
+      "checkout_date": "${_checkOutDate!.year}-${_checkOutDate!.month.toString().padLeft(2, '0')}-${_checkOutDate!.day.toString().padLeft(2, '0')}",
+      "adults": adultCount,
+      "children": childCount,
+      "status": "pending",
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse("http://10.0.2.2/db_rosario/bookings.php"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(bookingData),
+      );
+
+      final result = jsonDecode(response.body);
+      if (result['success']) {
+        showBookingAlert();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Booking failed')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -47,8 +107,6 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
             width: double.infinity,
             child: Image.asset('assets/images/RoomD.png', fit: BoxFit.cover),
           ),
-
-          // ✅ Back arrow goes to RoomListPage (room_search.dart)
           Positioned(
             top: 40,
             left: 20,
@@ -64,8 +122,6 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
               },
             ),
           ),
-
-          // ✅ White rounded container
           Container(
             margin: EdgeInsets.only(top: screenHeight * 0.3),
             padding: const EdgeInsets.fromLTRB(30, 30, 30, 50),
@@ -98,8 +154,6 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  
-                  // Price and Rate
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -163,10 +217,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 20),
-
-                  // ✅ DETAILS / BOOK NOW section
                   Center(
                     child: Column(
                       children: [
@@ -212,10 +263,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 40),
-
-                  // ✅ Calendar Selector
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -270,10 +318,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 30),
-
-                  // ✅ Room + Guest Selection
                   const Text("Room"),
                   const SizedBox(height: 6),
                   GestureDetector(
@@ -328,24 +373,23 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                         ),
                       ),
                     ),
-
                   const SizedBox(height: 40),
-
-                  ElevatedButton(
-                    onPressed: showBookingAlert,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlueAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'Complete Booking',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
-                      ),
-                    ),
-                  ),
-
+                  _isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: _isLoading ? null : submitBooking,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.lightBlueAccent,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Complete Booking',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                            ),
+                          ),
+                        ),
                   const SizedBox(height: 80),
                 ],
               ),
@@ -356,7 +400,6 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
     );
   }
 
-  // Helper
   Widget buildCounterRow(String label, int value, Function(int) onChanged) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
