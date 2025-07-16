@@ -1,0 +1,2 @@
+Could not access file: C:\xampp\htdocs\db_rosario/../my_app/assets/images/logo.png
+Exception: Could not access file: C:\xampp\htdocs\db_rosario/../my_app/assets/images/logo.png

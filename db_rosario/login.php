@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
@@ -36,12 +39,22 @@ $result = $conn->query($query);
 if ($result && $result->num_rows > 0) {
     $user = $result->fetch_assoc();
 
+    // Check if verified
+    if (!$user['verified']) {
+        echo json_encode([
+            "success" => false,
+            "message" => "Please verify your email before logging in."
+        ]);
+        exit();
+    }
+
     // Verify hashed password
     if (password_verify($password, $user['password'])) {
         echo json_encode([
             "success" => true,
             "message" => "Login successful",
-            "username" => $user["full_name"]
+            "username" => $user["full_name"],
+            "user_id" => (int)$user["user_id"]
         ]);
     } else {
         echo json_encode([

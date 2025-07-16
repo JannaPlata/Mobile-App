@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 14, 2025 at 02:45 PM
+-- Generation Time: Jul 15, 2025 at 07:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -35,13 +35,26 @@ CREATE TABLE `bookings` (
   `Adults` int(11) DEFAULT 1,
   `Children` int(11) DEFAULT 0,
   `Customer_ID` int(11) DEFAULT NULL,
-  `User_ID` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `Date` date NOT NULL,
   `CheckIn_Date` date DEFAULT NULL,
   `CheckOut_Date` date DEFAULT NULL,
   `Time` time NOT NULL,
   `Status` enum('Pending','Confirmed','Cancelled') NOT NULL DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bookings`
+--
+
+INSERT INTO `bookings` (`Booking_ID`, `Booking_Type`, `Room_ID`, `Room_Count`, `Adults`, `Children`, `Customer_ID`, `user_id`, `Date`, `CheckIn_Date`, `CheckOut_Date`, `Time`, `Status`) VALUES
+(20, 'online', 1, 2, 1, 1, 4, 4, '2025-07-15', '2025-07-15', '2025-07-23', '06:14:33', 'Pending'),
+(21, 'online', 1, 2, 4, 4, 4, 4, '2025-07-15', '2025-07-15', '2025-07-23', '13:03:00', 'Pending'),
+(22, 'online', 1, 1, 2, 1, 4, 4, '2025-07-15', '2025-07-23', '2025-07-31', '14:33:39', 'Pending'),
+(37, 'online', 1, 1, 4, 2, 5, 14, '2025-07-15', '2025-07-16', '2025-07-30', '17:03:07', 'Pending'),
+(45, 'online', 1, 1, 3, 2, 5, 14, '2025-07-15', '2025-07-16', '2025-07-30', '17:48:23', 'Pending'),
+(53, 'online', 1, 2, 1, 4, 5, 14, '2025-07-15', '2025-07-16', '2025-07-30', '18:43:49', 'Pending'),
+(59, 'online', 1, 2, 2, 4, 5, 14, '2025-07-15', '2025-07-16', '2025-07-30', '19:12:29', 'Pending');
 
 -- --------------------------------------------------------
 
@@ -54,22 +67,31 @@ CREATE TABLE `customers` (
   `Name` varchar(100) DEFAULT NULL,
   `Contact_number` varchar(15) DEFAULT NULL,
   `Email` varchar(100) DEFAULT NULL,
-  `User_ID` int(11) DEFAULT NULL
+  `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `customers`
+--
+
+INSERT INTO `customers` (`Customer_ID`, `Name`, `Contact_number`, `Email`, `user_id`) VALUES
+(4, 'JANNA PEARLENE PLATA', NULL, '22-31099@g.batstate-u.edu.ph', 4),
+(5, 'Janna Plata', '09637338381', 'jannajaplos09@gmail.com', 14);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `notifications`
+-- Table structure for table `notification`
 --
 
-CREATE TABLE `notifications` (
+CREATE TABLE `notification` (
   `Notification_ID` int(11) NOT NULL,
   `Booking_ID` int(11) DEFAULT NULL,
-  `User_ID` int(11) DEFAULT NULL,
+  `recipient_id` int(11) DEFAULT NULL,
+  `recipient_type` enum('user','staff') DEFAULT NULL,
   `Message` text DEFAULT NULL,
   `Date` datetime DEFAULT current_timestamp(),
-  `Status` enum('Unread','Read') DEFAULT 'Unread'
+  `Status` varchar(20) DEFAULT 'unread'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -100,7 +122,7 @@ INSERT INTO `rooms` (`Room_ID`, `Room_Name`, `Capacity`, `Price`, `Status`) VALU
 --
 
 CREATE TABLE `staff` (
-  `User_ID` int(11) NOT NULL,
+  `staff_id` int(11) NOT NULL,
   `Name` varchar(100) DEFAULT NULL,
   `Email` varchar(100) DEFAULT NULL,
   `Password` varchar(255) DEFAULT NULL,
@@ -114,27 +136,32 @@ CREATE TABLE `staff` (
 --
 
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `full_name` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `photo` text DEFAULT NULL
+  `photo` text DEFAULT NULL,
+  `reset_token` varchar(255) DEFAULT NULL,
+  `reset_expires` datetime DEFAULT NULL,
+  `verified` tinyint(1) DEFAULT 0,
+  `verification_token` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `password`, `created_at`, `photo`) VALUES
-(1, 'Janna plata', 'jannajaplos09@gmail.com', '0987263241', '$2y$10$35iJwbZ39z93fyFL0yl8hObVvK5cTE0xWbOdydAQvC6DnVdcBW17i', '2025-07-05 07:14:53', NULL),
-(2, 'Janna Japlos', 'janna09@gmail.com', '09123674312', '$2y$10$uis1CXwwRPumGAG6P26gWO0o1nHZRUQcQEW3VkkfWmFce8d.fRBSC', '2025-07-05 12:24:11', NULL),
-(3, 'janna plata', 'jannaplata09@gmail.com', '09162748321', '$2y$10$TY7aZb3zobthHtEC.oruqeKrAHJYcysbAkM2rg6neglhKRl2pOjui', '2025-07-05 12:29:07', NULL),
-(4, 'JANNA PEARLENE PLATA', '22-31099@g.batstate-u.edu.ph', NULL, '', '2025-07-11 13:31:45', ''),
-(5, 'fdafsadsa', 'dsadsa@gmail.com', '091231231321', '$2y$10$n.cBo4FBmJ0exnUg/VLB9ezww88gNz0DgYPNDIZd7ep3CAPBR4GUS', '2025-07-13 14:14:27', NULL),
-(6, 'ewqeqwewq', '3211321@gmail.com', '3213213213', '$2y$10$U1hejUU/SywVwkeSNNkTDueKmXVtA26qUWP3dbxf2B.7fwHpn0RO6', '2025-07-13 14:27:17', NULL),
-(7, 'jed estor', 'jedestor@gmail.com', '09123213123', '$2y$10$qZtVq8KLaGjXysxHOm22kuyXzg6exOD43rIXuEu/W3sPiK/cflTB6', '2025-07-13 15:40:50', NULL);
+INSERT INTO `users` (`user_id`, `full_name`, `email`, `phone`, `password`, `created_at`, `photo`, `reset_token`, `reset_expires`, `verified`, `verification_token`) VALUES
+(2, 'Janna Japlos', 'janna09@gmail.com', '09123674312', '$2y$10$uis1CXwwRPumGAG6P26gWO0o1nHZRUQcQEW3VkkfWmFce8d.fRBSC', '2025-07-05 12:24:11', NULL, NULL, NULL, 0, NULL),
+(4, 'JANNA PEARLENE PLATA', '22-31099@g.batstate-u.edu.ph', NULL, '', '2025-07-11 13:31:45', '', NULL, NULL, 0, NULL),
+(5, 'fdafsadsa', 'dsadsa@gmail.com', '091231231321', '$2y$10$n.cBo4FBmJ0exnUg/VLB9ezww88gNz0DgYPNDIZd7ep3CAPBR4GUS', '2025-07-13 14:14:27', NULL, NULL, NULL, 0, NULL),
+(6, 'ewqeqwewq', '3211321@gmail.com', '3213213213', '$2y$10$U1hejUU/SywVwkeSNNkTDueKmXVtA26qUWP3dbxf2B.7fwHpn0RO6', '2025-07-13 14:27:17', NULL, NULL, NULL, 0, NULL),
+(7, 'jed estor', 'jedestor@gmail.com', '09123213123', '$2y$10$qZtVq8KLaGjXysxHOm22kuyXzg6exOD43rIXuEu/W3sPiK/cflTB6', '2025-07-13 15:40:50', NULL, NULL, NULL, 0, NULL),
+(8, 'Janna Japlos', 'jnplrn@gmail.com', '09782636162', '$2y$10$PZWWKhxblKxq7vhw5bX17eHTkw/6yWIjZEwOrzj3JVO7jrncqZZce', '2025-07-14 16:38:38', NULL, '48597c37872452d720f7a5f9c9aced5b', '2025-07-14 18:47:51', 0, NULL),
+(9, 'Janna Japlos Plata', 'wuther22@gmail.com', '09876352671', '$2y$10$pf0OjLq.nleWLkLGMZOCu.U3vsx2GiW.QlfWlpRJpJmsFNP0f9QpW', '2025-07-14 16:49:01', NULL, NULL, NULL, 0, NULL),
+(14, 'Janna Plata', 'jannajaplos09@gmail.com', '09637338381', '$2y$10$o4O2h/uGXtYlTaN/8C8Cg.wH4jT5VWCCIOLisYp7h/l2geS7vgqLW', '2025-07-15 14:12:33', NULL, NULL, NULL, 1, NULL);
 
 --
 -- Indexes for dumped tables
@@ -147,22 +174,21 @@ ALTER TABLE `bookings`
   ADD PRIMARY KEY (`Booking_ID`),
   ADD KEY `Room_ID` (`Room_ID`),
   ADD KEY `Customer_ID` (`Customer_ID`),
-  ADD KEY `User_ID` (`User_ID`);
+  ADD KEY `User_ID` (`user_id`);
 
 --
 -- Indexes for table `customers`
 --
 ALTER TABLE `customers`
   ADD PRIMARY KEY (`Customer_ID`),
-  ADD KEY `fk_user_customer` (`User_ID`);
+  ADD KEY `fk_user_customer` (`user_id`);
 
 --
--- Indexes for table `notifications`
+-- Indexes for table `notification`
 --
-ALTER TABLE `notifications`
+ALTER TABLE `notification`
   ADD PRIMARY KEY (`Notification_ID`),
-  ADD KEY `Booking_ID` (`Booking_ID`),
-  ADD KEY `User_ID` (`User_ID`);
+  ADD KEY `Booking_ID` (`Booking_ID`);
 
 --
 -- Indexes for table `rooms`
@@ -174,13 +200,13 @@ ALTER TABLE `rooms`
 -- Indexes for table `staff`
 --
 ALTER TABLE `staff`
-  ADD PRIMARY KEY (`User_ID`);
+  ADD PRIMARY KEY (`staff_id`);
 
 --
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
+  ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `email` (`email`);
 
 --
@@ -191,18 +217,18 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `Booking_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `Booking_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `Customer_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `Customer_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `notifications`
+-- AUTO_INCREMENT for table `notification`
 --
-ALTER TABLE `notifications`
+ALTER TABLE `notification`
   MODIFY `Notification_ID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -215,13 +241,13 @@ ALTER TABLE `rooms`
 -- AUTO_INCREMENT for table `staff`
 --
 ALTER TABLE `staff`
-  MODIFY `User_ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `staff_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Constraints for dumped tables
@@ -233,20 +259,19 @@ ALTER TABLE `users`
 ALTER TABLE `bookings`
   ADD CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`Room_ID`) REFERENCES `rooms` (`Room_ID`),
   ADD CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`Customer_ID`) REFERENCES `customers` (`Customer_ID`),
-  ADD CONSTRAINT `bookings_ibfk_3` FOREIGN KEY (`User_ID`) REFERENCES `staff` (`User_ID`);
+  ADD CONSTRAINT `fk_user_id_in_bookings` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
 -- Constraints for table `customers`
 --
 ALTER TABLE `customers`
-  ADD CONSTRAINT `fk_user_customer` FOREIGN KEY (`User_ID`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
--- Constraints for table `notifications`
+-- Constraints for table `notification`
 --
-ALTER TABLE `notifications`
-  ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`Booking_ID`) REFERENCES `bookings` (`Booking_ID`),
-  ADD CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`User_ID`) REFERENCES `staff` (`User_ID`);
+ALTER TABLE `notification`
+  ADD CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`Booking_ID`) REFERENCES `bookings` (`Booking_ID`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

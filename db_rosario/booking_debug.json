@@ -1,0 +1,11 @@
+{
+    "booking_type": "online",
+    "room_id": 1,
+    "room_count": 3,
+    "user_id": 14,
+    "checkin_date": "2025-07-16",
+    "checkout_date": "2025-07-30",
+    "adults": 1,
+    "children": 1,
+    "status": "pending"
+}
