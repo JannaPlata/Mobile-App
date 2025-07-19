@@ -6,22 +6,38 @@ import 'profile_screen.dart'; // Import ProfileScreen
 class RoomListPage extends StatelessWidget {
   RoomListPage({super.key});
 
-  final List<Map<String, dynamic>> rooms = List.generate(
-    3,
-    (index) => {
-      'title': 'Deluxe Suite Room',
+  final List<Map<String, dynamic>> rooms = [
+    {
+      'room_id': 1,
+      'title': 'Luxe Lounge',
       'guests': '3 Guests',
-      'price': '₱450/night',
+      'price': '₱4500/night',
       'freeCancel': 'Free cancellation',
-      'imageUrl': 'assets/images/room${index + 1}.png',
+      'imageUrl': 'assets/images/room1.png',
     },
-  );
+    {
+      'room_id': 2,
+      'title': 'Deluxe Suite',
+      'guests': '3 Guests',
+      'price': '₱5200/night',
+      'freeCancel': 'Free cancellation',
+      'imageUrl': 'assets/images/room2.png',
+    },
+    {
+      'room_id': 3,
+      'title': 'Premium King',
+      'guests': '3 Guests',
+      'price': '₱6000/night',
+      'freeCancel': 'Free cancellation',
+      'imageUrl': 'assets/images/room3.png',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // ✅ Hides the back arrow
+        automaticallyImplyLeading: false, 
         backgroundColor: Colors.white,
         elevation: 0,
         toolbarHeight: 80,
@@ -98,8 +114,13 @@ class RoomListPage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    const DeluxeSuiteRoomPage(),
+                                builder: (context) => RoomDetailsPage(
+                                  name: room['title'] ?? '',
+                                  image: room['imageUrl'] ?? 'assets/images/default.png',
+                                  price: int.tryParse(room['price']?.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
+                                  rating: 4.9,
+                                  roomId: room['room_id'] ?? 0,
+                                ),
                               ),
                             );
                           },

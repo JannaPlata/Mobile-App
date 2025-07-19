@@ -9,7 +9,20 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RoomDesignPage extends StatefulWidget {
-  const RoomDesignPage({super.key});
+  final String name;
+  final String image;
+  final int price;
+  final double rating;
+  final int roomId;
+
+  const RoomDesignPage({
+    super.key,
+    required this.name,
+    required this.image,
+    required this.price,
+    required this.rating,
+    required this.roomId,
+  });
 
   @override
   State<RoomDesignPage> createState() => _RoomDesignPageState();
@@ -61,7 +74,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
 
     final bookingData = {
       "booking_type": "online",
-      "room_id": 1, // Update if you have dynamic rooms
+      "room_id": widget.roomId,
       "room_count": roomCount,
       "user_id": userId,
       "checkin_date": "${_checkInDate!.year}-${_checkInDate!.month.toString().padLeft(2, '0')}-${_checkInDate!.day.toString().padLeft(2, '0')}",
@@ -70,6 +83,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
       "children": childCount,
       "status": "pending",
     };
+    print('Booking data: ' + bookingData.toString());
 
     try {
       final response = await http.post(
@@ -105,7 +119,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
           SizedBox(
             height: screenHeight * 0.4,
             width: double.infinity,
-            child: Image.asset('assets/images/RoomD.png', fit: BoxFit.cover),
+            child: Image.asset(widget.image, fit: BoxFit.cover),
           ),
           Positioned(
             top: 40,
@@ -145,7 +159,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                 children: [
                   Center(
                     child: Text(
-                      'Deluxe Suite Room',
+                      widget.name,
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -170,12 +184,25 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Text('₱450',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: const Color.fromARGB(255, 52, 201, 228),
-                                ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '₱',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                      color: const Color.fromARGB(255, 52, 201, 228),
+                                    ),
+                                  ),
+                                  Text(
+                                    '${widget.price}',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color.fromARGB(255, 52, 201, 228),
+                                    ),
+                                  ),
+                                ],
                               ),
                               const SizedBox(width: 4),
                               Text('/night',
@@ -198,9 +225,10 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                           ),
                           const SizedBox(height: 4),
                           Row(
-                            children: const [
-                              Text('4.5 ',
-                                style: TextStyle(
+                            children: [
+                              Text(
+                                '${widget.rating.toStringAsFixed(1)} ',
+                                style: const TextStyle(
                                   color: Colors.orange,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -229,7 +257,13 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const DeluxeSuiteRoomPage(),
+                                    builder: (context) => RoomDetailsPage(
+                                      name: widget.name,
+                                      image: widget.image,
+                                      price: widget.price,
+                                      rating: widget.rating,
+                                      roomId: widget.roomId,
+                                    ),
                                   ),
                                 );
                               },
