@@ -2,11 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'calendar_page.dart';
 import 'alert_message.dart';
-import 'room_search.dart'; // ✅ make sure this file contains `RoomListPage`
-import 'room_details.dart'; // Still used for "DETAILS" navigation
+import 'room_search.dart';
+import 'room_details.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RoomDesignPage extends StatefulWidget {
-  const RoomDesignPage({super.key});
+  final String name;
+  final String image;
+  final int price;
+  final double rating;
+  final int roomId;
+
+  const RoomDesignPage({
+    super.key,
+    required this.name,
+    required this.image,
+    required this.price,
+    required this.rating,
+    required this.roomId,
+  });
 
   @override
   State<RoomDesignPage> createState() => _RoomDesignPageState();
@@ -20,6 +36,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
   int adultCount = 0;
   int childCount = 0;
   bool showRoomOptions = false;
+  bool _isLoading = false;
 
   void showBookingAlert() {
     showDialog(
@@ -34,6 +51,69 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
     );
   }
 
+  Future<void> submitBooking() async {
+    setState(() => _isLoading = true);
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("You must log in before booking.")),
+      );
+      setState(() => _isLoading = false);
+      return;
+    }
+    print('Booking as user_id: $userId');
+
+    if (_checkInDate == null || _checkOutDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please select check-in and check-out dates.")),
+      );
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    final bookingData = {
+      "booking_type": "online",
+      "room_id": widget.roomId,
+      "room_count": roomCount,
+      "user_id": userId,
+      "checkin_date": "${_checkInDate!.year}-${_checkInDate!.month.toString().padLeft(2, '0')}-${_checkInDate!.day.toString().padLeft(2, '0')}",
+      "checkout_date": "${_checkOutDate!.year}-${_checkOutDate!.month.toString().padLeft(2, '0')}-${_checkOutDate!.day.toString().padLeft(2, '0')}",
+      "adults": adultCount,
+      "children": childCount,
+      "status": "pending",
+    };
+    print('Booking data: $bookingData');
+
+    try {
+      final response = await http.post(
+       Uri.parse("https://rosarioresortshotel.alwaysdata.net/bookings.php"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(bookingData),
+      );
+
+      final result = jsonDecode(response.body);
+      if (result['success']) {
+        showBookingAlert();
+        // Save booking details to SharedPreferences for home page display
+        await prefs.setString('last_booking_checkin', "${_checkInDate!.year}-${_checkInDate!.month.toString().padLeft(2, '0')}-${_checkInDate!.day.toString().padLeft(2, '0')}");
+        await prefs.setString('last_booking_checkout', "${_checkOutDate!.year}-${_checkOutDate!.month.toString().padLeft(2, '0')}-${_checkOutDate!.day.toString().padLeft(2, '0')}");
+        await prefs.setInt('last_booking_adults', adultCount);
+        await prefs.setInt('last_booking_children', childCount);
+        await prefs.setInt('last_booking_room_count', roomCount);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Booking failed')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
+    setState(() => _isLoading = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -45,10 +125,8 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
           SizedBox(
             height: screenHeight * 0.4,
             width: double.infinity,
-            child: Image.asset('assets/images/RoomD.png', fit: BoxFit.cover),
+            child: Image.asset(widget.image, fit: BoxFit.cover),
           ),
-
-          // ✅ Back arrow goes to RoomListPage (room_search.dart)
           Positioned(
             top: 40,
             left: 20,
@@ -64,8 +142,6 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
               },
             ),
           ),
-
-          // ✅ White rounded container
           Container(
             margin: EdgeInsets.only(top: screenHeight * 0.3),
             padding: const EdgeInsets.fromLTRB(30, 30, 30, 50),
@@ -89,7 +165,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                 children: [
                   Center(
                     child: Text(
-                      'Deluxe Suite Room',
+                      widget.name,
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -98,8 +174,6 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  
-                  // Price and Rate
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -116,12 +190,25 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Text('₱450',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: const Color.fromARGB(255, 52, 201, 228),
-                                ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '₱',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                      color: const Color.fromARGB(255, 52, 201, 228),
+                                    ),
+                                  ),
+                                  Text(
+                                    '${widget.price}',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color.fromARGB(255, 52, 201, 228),
+                                    ),
+                                  ),
+                                ],
                               ),
                               const SizedBox(width: 4),
                               Text('/night',
@@ -144,9 +231,10 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                           ),
                           const SizedBox(height: 4),
                           Row(
-                            children: const [
-                              Text('4.5 ',
-                                style: TextStyle(
+                            children: [
+                              Text(
+                                '${widget.rating.toStringAsFixed(1)} ',
+                                style: const TextStyle(
                                   color: Colors.orange,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -163,10 +251,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 20),
-
-                  // ✅ DETAILS / BOOK NOW section
                   Center(
                     child: Column(
                       children: [
@@ -178,7 +263,13 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const DeluxeSuiteRoomPage(),
+                                    builder: (context) => RoomDetailsPage(
+                                      name: widget.name,
+                                      image: widget.image,
+                                      price: widget.price,
+                                      rating: widget.rating,
+                                      roomId: widget.roomId,
+                                    ),
                                   ),
                                 );
                               },
@@ -212,10 +303,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 40),
-
-                  // ✅ Calendar Selector
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -270,10 +358,7 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 30),
-
-                  // ✅ Room + Guest Selection
                   const Text("Room"),
                   const SizedBox(height: 6),
                   GestureDetector(
@@ -328,24 +413,23 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
                         ),
                       ),
                     ),
-
                   const SizedBox(height: 40),
-
-                  ElevatedButton(
-                    onPressed: showBookingAlert,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlueAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'Complete Booking',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
-                      ),
-                    ),
-                  ),
-
+                  _isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: _isLoading ? null : submitBooking,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.lightBlueAccent,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Complete Booking',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                            ),
+                          ),
+                        ),
                   const SizedBox(height: 80),
                 ],
               ),
@@ -356,7 +440,6 @@ class _RoomDesignPageState extends State<RoomDesignPage> {
     );
   }
 
-  // Helper
   Widget buildCounterRow(String label, int value, Function(int) onChanged) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

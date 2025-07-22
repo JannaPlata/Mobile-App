@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'terms_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -14,13 +15,21 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
-  bool _agreeTerms = false;
+  bool _acceptedTerms = false;
 
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =TextEditingController();
+
+   bool isStrongPassword(String password) {
+    final hasUppercase = password.contains(RegExp(r'[A-Z]'));
+    final hasLowercase = password.contains(RegExp(r'[a-z]'));
+    final hasDigits = password.contains(RegExp(r'[0-9]'));
+    final hasMinLength = password.length >= 8;
+    return hasUppercase && hasLowercase && hasDigits && hasMinLength;
+  }
 
   Future<void> _registerUser() async {
     if (fullNameController.text.trim().isEmpty ||
@@ -41,14 +50,23 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    if (!_agreeTerms) {
+    if (!isStrongPassword(passwordController.text.trim())) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("You must agree to the terms.")),
+        const SnackBar(
+          content: Text("Password must be at least 8 characters and include uppercase, lowercase, and a number.")),
+      );
+      return;
+    }
+    if (!_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("You must agree to the Terms and Privacy Policy."),
+        ),
       );
       return;
     }
 
-    const String url = 'http://10.0.2.2/db_rosario/register.php';
+    const String url = 'http://rosarioresortshotel.alwaysdata.net/register.php';
 
     try {
       final response = await http.post(
@@ -63,75 +81,69 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       final data = jsonDecode(response.body);
+if (data["success"]) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(data["message"])),
+  );
+  Navigator.pop(context);
+} else {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(data["message"] ?? "Registration failed.")),
+  );
+}
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+
+  //  Google Sign-In Method
+  Future<void> signUpWithGoogle() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+
+    try {
+      // Force sign out to show the account picker again
+      await googleSignIn.signOut();
+
+      final GoogleSignInAccount? account = await googleSignIn.signIn();
+
+      if (account == null) {
+        print("Google Sign-In cancelled");
+        return;
+      }
+
+      final String email = account.email;
+      final String? name = account.displayName;
+      final String? photoUrl = account.photoUrl;
+
+      const String url = "http://rosarioresortshotel.alwaysdata.net/google_signup.php";
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "name": name, "photo": photoUrl}),
+      );
+
+      final data = jsonDecode(response.body);
+
       if (data["success"]) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Registration successful")),
+          SnackBar(content: Text(data["message"] ?? "Signed up successfully")),
         );
         Navigator.pop(context); // Return to login screen
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"] ?? "Registration failed")),
+          SnackBar(content: Text(data["message"] ?? "Signup failed")),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      print("Google Sign-In Error: $e");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
-
-  // ✅ Google Sign-In Method
-  Future<void> signUpWithGoogle() async {
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-
-  try {
-    // ✅ Force sign out to show the account picker again
-    await googleSignIn.signOut();
-
-    final GoogleSignInAccount? account = await googleSignIn.signIn();
-
-    if (account == null) {
-      print("Google Sign-In cancelled");
-      return;
-    }
-
-    final String email = account.email;
-    final String? name = account.displayName;
-    final String? photoUrl = account.photoUrl;
-
-    const String url = "http://10.0.2.2/db_rosario/google_signup.php";
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "email": email,
-        "name": name,
-        "photo": photoUrl,
-      }),
-    );
-
-    final data = jsonDecode(response.body);
-
-    if (data["success"]) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(data["message"] ?? "Signed up successfully")),
-      );
-      Navigator.pop(context); // Return to login screen
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(data["message"] ?? "Signup failed")),
-      );
-    }
-  } catch (e) {
-    print("Google Sign-In Error: $e");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Error: $e")),
-    );
-  }
-}
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +163,9 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 50),
-                Center(child: Image.asset('assets/images/logo.png', height: 100)),
+                Center(
+                  child: Image.asset('assets/images/logo.png', height: 100),
+                ),
                 const SizedBox(height: 15),
                 ShaderMask(
                   shaderCallback: (bounds) => const LinearGradient(
@@ -223,10 +237,19 @@ class _SignupScreenState extends State<SignupScreen> {
                         controller: fullNameController,
                         style: GoogleFonts.poppins(fontSize: 14),
                         decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                           hintText: 'Full Name',
-                          hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
-                          prefixIcon: const Icon(Icons.person, color: Colors.grey),
+                          hintStyle: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.person,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -234,10 +257,19 @@ class _SignupScreenState extends State<SignupScreen> {
                         controller: emailController,
                         style: GoogleFonts.poppins(fontSize: 14),
                         decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                           hintText: 'Email Address',
-                          hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
-                          prefixIcon: const Icon(Icons.email, color: Colors.grey),
+                          hintStyle: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.email,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -245,10 +277,19 @@ class _SignupScreenState extends State<SignupScreen> {
                         controller: phoneController,
                         style: GoogleFonts.poppins(fontSize: 14),
                         decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                           hintText: 'Phone Number',
-                          hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
-                          prefixIcon: const Icon(Icons.phone, color: Colors.grey),
+                          hintStyle: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.phone,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -257,13 +298,24 @@ class _SignupScreenState extends State<SignupScreen> {
                         obscureText: _obscurePassword,
                         style: GoogleFonts.poppins(fontSize: 14),
                         decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                           hintText: 'Password',
-                          hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
-                          prefixIcon: const Icon(Icons.lock, color: Colors.grey),
+                          hintStyle: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.lock,
+                            color: Colors.grey,
+                          ),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: Colors.grey,
                             ),
                             onPressed: () {
@@ -280,13 +332,24 @@ class _SignupScreenState extends State<SignupScreen> {
                         obscureText: _obscureConfirm,
                         style: GoogleFonts.poppins(fontSize: 14),
                         decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                           hintText: 'Confirm Password',
-                          hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
-                          prefixIcon: const Icon(Icons.lock, color: Colors.grey),
+                          hintStyle: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.lock,
+                            color: Colors.grey,
+                          ),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureConfirm ? Icons.visibility_off : Icons.visibility,
+                              _obscureConfirm
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: Colors.grey,
                             ),
                             onPressed: () {
@@ -301,21 +364,50 @@ class _SignupScreenState extends State<SignupScreen> {
                       Row(
                         children: [
                           Checkbox(
-                            value: _agreeTerms,
+                            value: _acceptedTerms,
                             onChanged: (value) {
                               setState(() {
-                                _agreeTerms = value!;
+                                _acceptedTerms = value!;
                               });
                             },
                           ),
                           Expanded(
-                            child: Text(
-                              "I agree to the Terms & Conditions",
-                              style: GoogleFonts.poppins(fontSize: 12),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const TermsScreen(),
+                                  ),
+                                );
+                              },
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'I agree to the ',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: 'Terms and Privacy Policy',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Color(0xFF3D93C0),
+                                        fontWeight: FontWeight.w600,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 10),
                       Container(
                         width: double.infinity,
@@ -330,7 +422,20 @@ class _SignupScreenState extends State<SignupScreen> {
                           border: Border.all(color: Colors.black, width: 1),
                         ),
                         child: TextButton(
-                          onPressed: _registerUser,
+                          onPressed: () {
+                            if (!_acceptedTerms) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "You must agree to the Terms and Privacy Policy.",
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+                            _registerUser();
+                          },
                           style: TextButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
@@ -345,16 +450,32 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(width: 64, height: 1, child: DecoratedBox(decoration: BoxDecoration(color: Colors.grey))),
+                          const SizedBox(
+                            width: 64,
+                            height: 1,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(color: Colors.grey),
+                            ),
+                          ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Text("or sign up with", style: GoogleFonts.poppins(fontSize: 12)),
+                            child: Text(
+                              "or sign up with",
+                              style: GoogleFonts.poppins(fontSize: 12),
+                            ),
                           ),
-                          const SizedBox(width: 64, height: 1, child: DecoratedBox(decoration: BoxDecoration(color: Colors.grey))),
+                          const SizedBox(
+                            width: 64,
+                            height: 1,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(color: Colors.grey),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 15),
@@ -363,7 +484,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         children: [
                           GestureDetector(
                             onTap: signUpWithGoogle,
-                            child: Image.asset('assets/images/google.png', height: 30),
+                            child: Image.asset(
+                              'assets/images/google.png',
+                              height: 30,
+                            ),
                           ),
                           const SizedBox(width: 20),
                           Image.asset('assets/images/facebook.png', height: 30),
@@ -373,7 +497,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("Already have an account? ", style: GoogleFonts.poppins(fontSize: 12)),
+                          Text(
+                            "Already have an account? ",
+                            style: GoogleFonts.poppins(fontSize: 12),
+                          ),
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
                             child: Text(

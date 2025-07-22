@@ -18,7 +18,7 @@ class AlertMessage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ✅ Larger, rounded check icon
+              
               Container(
                 width: 50,
                 height: 50,
@@ -27,14 +27,15 @@ class AlertMessage extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.check_rounded, // Rounded, bolder check icon
+                  Icons.check_rounded,
                   color: Color(0xFF58CAFF),
-                  size: 40, // Larger size for better visibility
+                  size: 40,
                 ),
               ),
               const SizedBox(height: 10),
               Text(
-                'Booking Confirmed!',
+                'Booking received! Confirmation will be sent soon.',
+                textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
@@ -46,7 +47,7 @@ class AlertMessage extends StatelessWidget {
                 'Thank you for booking with\nRosario Resorts and Hotel!',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
                   color: Colors.black87,
                 ),

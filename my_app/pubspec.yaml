@@ -19,11 +19,19 @@ dependencies:
   google_sign_in: ^6.2.1
   shared_preferences: ^2.2.0
   http: ^1.2.1
+  auth_email: ^0.3.0
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+    
+  flutter_launcher_icons: ^0.13.1
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
+  background_color: "#FFFFFF"
 
 
   flutter_lints: ^5.0.0

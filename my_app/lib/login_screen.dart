@@ -5,7 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
-import 'home.dart'; 
+import 'home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    const String url = 'http://10.0.2.2/db_rosario/login.php';
+    const String url = 'http://rosarioresortshotel.alwaysdata.net/login.php';
 
     try {
       final response = await http.post(
@@ -45,13 +46,20 @@ class _LoginScreenState extends State<LoginScreen> {
       final data = jsonDecode(response.body);
 
       if (data["success"]) {
+        print("Login: username= "+(data['username'] ?? '')+", email="+(data['email'] ?? '')+", phone="+(data['phone'] ?? ''));
+        // Save user_id to SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('user_id', data["user_id"]);
+        await prefs.setString('username', data["username"] ?? "");
+        await prefs.setString('email', data["email"] ?? "");
+        await prefs.setString('phone', data["phone"] ?? "");
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(data["message"])));
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HotelHomePage(username: data["username"]),
+            builder: (context) => const HotelHomePage(),
           ),
         );
       } else {
@@ -67,56 +75,80 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ✅ Google Sign-In with forced account picker
-  Future<void> signUpWithGoogle() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+  Future<void> signInWithGoogle() async {
+  final GoogleSignIn googleSignIn = GoogleSignIn();
 
-    try {
-      // Force sign out to clear cached account
-      await googleSignIn.signOut();
+  try {
+    await googleSignIn.signOut(); // Force account picker
 
-      // Prompt account picker
-      final GoogleSignInAccount? account = await googleSignIn.signIn();
+    final GoogleSignInAccount? account = await googleSignIn.signIn();
 
-      if (account == null) {
-        print("Google Sign-In cancelled");
-        return;
-      }
-
-      final String email = account.email;
-      final String? name = account.displayName;
-      final String? photoUrl = account.photoUrl;
-
-      const String url = "http://10.0.2.2/db_rosario/google_login.php";
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email, "name": name, "photo": photoUrl}),
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (data["success"]) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Signed in as ${data['username']}")),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HotelHomePage(username: data["username"]),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"] ?? "Signup failed")),
-        );
-      }
-    } catch (e) {
-      print("Google Sign-In Error: $e");
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    if (account == null) {
+      print("Google Sign-In cancelled");
+      return;
     }
+
+    final String email = account.email;
+    final String? name = account.displayName;
+    final String? photoUrl = account.photoUrl;
+
+    const String url = "http://rosarioresortshotel.alwaysdata.net/google_login.php";
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": email,
+        "name": name,
+        "photo": photoUrl,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["success"]) {
+      // Save user info to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('user_id', data["user_id"]);
+      await prefs.setString('username', data["username"] ?? "");
+      await prefs.setString('email', data["email"] ?? "");
+      await prefs.setString('phone', data["phone"] ?? ""); // This may be empty if not provided
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Welcome, "+(data['username'] ?? ""))),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HotelHomePage(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data["message"] ?? "Google login failed")),
+      );
+    }
+  } catch (e) {
+    print("Google Sign-In Error: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: $e")),
+    );
+  }
+}
+
+  // Add logout function
+  Future<void> logoutUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_id');
+    // Optionally sign out from Google as well
+    try {
+      await GoogleSignIn().signOut();
+    } catch (_) {}
+    // Navigate to login screen
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (route) => false,
+    );
   }
 
   @override
@@ -330,14 +362,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           GestureDetector(
-                            onTap: signUpWithGoogle,
+                            onTap: signInWithGoogle,
                             child: Image.asset(
                               'assets/images/google.png',
                               height: 40,
                             ),
                           ),
-                          const SizedBox(width: 20),
-                          Image.asset('assets/images/facebook.png', height: 40),
                         ],
                       ),
                       const SizedBox(height: 20),

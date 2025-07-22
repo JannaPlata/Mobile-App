@@ -2,8 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'book.dart';
 
-class DeluxeSuiteRoomPage extends StatelessWidget {
-  const DeluxeSuiteRoomPage({super.key});
+class RoomDetailsPage extends StatelessWidget {
+  final String name;
+  final String image;
+  final int price;
+  final double rating;
+  final int roomId;
+
+  const RoomDetailsPage({
+    super.key,
+    required this.name,
+    required this.image,
+    required this.price,
+    required this.rating,
+    required this.roomId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +29,7 @@ class DeluxeSuiteRoomPage extends StatelessWidget {
           SizedBox(
             height: screenHeight * 0.4,
             width: double.infinity,
-            child: Image.asset('assets/images/RoomD.png', fit: BoxFit.cover),
+            child: Image.asset(image, fit: BoxFit.cover),
           ),
           Positioned(
             top: 40,
@@ -53,7 +66,7 @@ class DeluxeSuiteRoomPage extends StatelessWidget {
                 children: [
                   Center(
                     child: Text(
-                      'Deluxe Suite Room',
+                      name,
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -80,16 +93,20 @@ class DeluxeSuiteRoomPage extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                '₱450',
+                                '₱',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color.fromARGB(255, 52, 201, 228),
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                              Text(
+                                '$price',
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
-                                  color: const Color.fromARGB(
-                                    255,
-                                    52,
-                                    201,
-                                    228,
-                                  ),
+                                  color: Color.fromARGB(255, 52, 201, 228),
                                 ),
                               ),
                               const SizedBox(width: 4),
@@ -118,10 +135,10 @@ class DeluxeSuiteRoomPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Row(
-                            children: const [
+                            children: [
                               Text(
-                                '4.5 ',
-                                style: TextStyle(
+                                '${rating.toStringAsFixed(1)} ',
+                                style: const TextStyle(
                                   color: Colors.orange,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -163,8 +180,13 @@ class DeluxeSuiteRoomPage extends StatelessWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        const RoomDesignPage(),
+                                    builder: (context) => RoomDesignPage(
+                                      name: name,
+                                      image: image,
+                                      price: price,
+                                      rating: rating,
+                                      roomId: roomId,
+                                    ),
                                   ),
                                 );
                               },
@@ -202,7 +224,7 @@ class DeluxeSuiteRoomPage extends StatelessWidget {
 
                   const SizedBox(height: 30),
                   Text(
-                    'Experience comfort and luxury in our spacious Deluxe Suite, perfect for couples or small families. This elegant room features a plush king bed, a cozy seating area, modern interiors, and large windows with scenic views.',
+                    'Experience comfort and luxury in our spacious Luxe Lounge, perfect for couples or small families. This elegant room features a plush king bed, a cozy seating area, modern interiors, and large windows with scenic views.',
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: Colors.black87,

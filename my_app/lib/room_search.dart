@@ -1,36 +1,52 @@
 import 'package:flutter/material.dart';
 import 'room_details.dart';
-import 'home.dart'; // ✅ Make sure this is imported
-import 'profile_screen.dart'; // Import ProfileScreen
+import 'home.dart'; 
+import 'profile_screen.dart'; 
 
 class RoomListPage extends StatelessWidget {
   RoomListPage({super.key});
 
-  final List<Map<String, dynamic>> rooms = List.generate(
-    3,
-    (index) => {
-      'title': 'Deluxe Suite Room',
+  final List<Map<String, dynamic>> rooms = [
+    {
+      'room_id': 1,
+      'title': 'Luxe Lounge',
       'guests': '3 Guests',
-      'price': '₱450/night',
+      'price': '₱4500/night',
       'freeCancel': 'Free cancellation',
-      'imageUrl': 'assets/images/room${index + 1}.png',
+      'imageUrl': 'assets/images/room1.png',
     },
-  );
+    {
+      'room_id': 2,
+      'title': 'Deluxe Suite',
+      'guests': '3 Guests',
+      'price': '₱5200/night',
+      'freeCancel': 'Free cancellation',
+      'imageUrl': 'assets/images/room2.png',
+    },
+    {
+      'room_id': 3,
+      'title': 'Premium King',
+      'guests': '3 Guests',
+      'price': '₱6000/night',
+      'freeCancel': 'Free cancellation',
+      'imageUrl': 'assets/images/room3.png',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // ✅ Hides the back arrow
+        automaticallyImplyLeading: false, 
         backgroundColor: Colors.white,
         elevation: 0,
         toolbarHeight: 80,
-        title: TextField(
-          decoration: InputDecoration(
-            hintText: 'Search rooms...',
-            prefixIcon: Icon(Icons.search),
-            contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text(
+          'Rooms',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
           ),
         ),
       ),
@@ -98,8 +114,13 @@ class RoomListPage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    const DeluxeSuiteRoomPage(),
+                                builder: (context) => RoomDetailsPage(
+                                  name: room['title'] ?? '',
+                                  image: room['imageUrl'] ?? 'assets/images/default.png',
+                                  price: int.tryParse(room['price']?.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0,
+                                  rating: 4.9,
+                                  roomId: room['room_id'] ?? 0,
+                                ),
                               ),
                             );
                           },
@@ -124,20 +145,19 @@ class RoomListPage extends StatelessWidget {
         currentIndex: 1,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
-        onTap: (index) {
+        onTap: (index) async {
           if (index == 0) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => HotelHomePage(username: "Guest"),
+                builder: (context) => const HotelHomePage(),
               ),
             );
           } else if (index == 2) {
-            // After
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => ProfileScreen(username: "Guest"),
+                builder: (context) => const ProfileScreen(),
               ),
             );
           }

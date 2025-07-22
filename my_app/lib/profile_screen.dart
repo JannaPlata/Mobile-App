@@ -1,19 +1,45 @@
 import 'package:flutter/material.dart';
-import 'home.dart';  // For HotelHomePage navigation
-import 'room_search.dart'; // For RoomListPage navigation
-import 'login_screen.dart'; // <-- Import LoginScreen
+import 'home.dart';
+import 'room_search.dart';
+import 'login_screen.dart';
+import 'manage_accounts.dart'; // <-- Import ManageAccountScreen
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfileScreen extends StatelessWidget {
-  final String username;
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
 
-  const ProfileScreen({super.key, required this.username});
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String _username = '';
+  String _email = '';
+  String _phone = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _username = prefs.getString('username') ?? '';
+      _email = prefs.getString('email') ?? '';
+      _phone = prefs.getString('phone') ?? '';
+    });
+  }
 
   void _onNavTapped(BuildContext context, int index) {
     switch (index) {
       case 0:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HotelHomePage(username: username)),
+          MaterialPageRoute(
+            builder: (context) => const HotelHomePage(),
+          ),
         );
         break;
       case 1:
@@ -25,6 +51,25 @@ class ProfileScreen extends StatelessWidget {
       case 2:
         // Already on profile
         break;
+    }
+  }
+
+  Future<void> _openManageAccount() async {
+    print("ProfileScreen: username=$_username, email=$_email, phone=$_phone");
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ManageAccountScreen(
+          initialUsername: _username,
+          initialEmail: _email,
+          initialPhone: _phone,
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      // Reload user info from SharedPreferences
+      await _loadUserInfo();
     }
   }
 
@@ -66,17 +111,20 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // Show the dynamic username here
-                Text(username, style: const TextStyle(fontSize: 18)),
-
-                TextButton(onPressed: () {}, child: const Text("Edit name")),
+                Text(_username, style: const TextStyle(fontSize: 18)),
+                // Removed email and phone display from profile screen
                 const SizedBox(height: 20),
-                buildOptionTile(Icons.settings, "Manage account", () {}),
-                buildOptionTile(Icons.room_service, "My Reservations", () {}),
+                buildOptionTile(
+                  Icons.settings,
+                  "Manage account",
+                  _openManageAccount,
+                ),
                 buildOptionTile(Icons.logout, "Sign-out", () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
                   );
                 }),
               ],
